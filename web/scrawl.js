@@ -3,7 +3,7 @@
 const Scrawl = (() => {
   const c = document.getElementById("scrawl"), x = c.getContext("2d");
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const PENS = 9, SETTLE_MS = 12000, HOLD_ALPHA = .5;
+  const PENS = 6, SETTLE_MS = 12000, HOLD_ALPHA = .5;
   let ink = [], raf = 0, on = false, t0 = 0, last = 0, pens = [], op = 1, target = 1, map = null;
 
   const art = new Image();
@@ -66,7 +66,7 @@ const Scrawl = (() => {
       }
       const pale = pen.hue > .82;
       x.strokeStyle = pale ? `rgba(226,214,186,${HOLD_ALPHA})` : `rgba(198,204,226,${HOLD_ALPHA})`;
-      x.lineWidth = (.5 + Math.random() * .55 + wild * .3) * map.dpr;
+      x.lineWidth = (.85 + Math.random() * .6 + wild * .35) * map.dpr;
       x.stroke();
     }
   }

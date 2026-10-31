@@ -252,12 +252,14 @@ function paintPreview(now) {
   if (c.width !== W || c.height !== H) { c.width = W; c.height = H; hasHold = false; }
   const x = c.getContext("2d");
   x.imageSmoothingEnabled = true; x.imageSmoothingQuality = "high";
-  const f = still ? 1 : Math.min((now - fadeStart) / fadeMs, 1), e = f * f * (3 - 2 * f);
+  // The frame clock can read slightly before fadeStart; a negative alpha would be ignored and draw at full strength.
+  const since = Math.max(0, now - fadeStart);
+  const f = still ? 1 : Math.min(since / fadeMs, 1), e = f * f * (3 - 2 * f);
   blurNow += (blurTarget - blurNow) * .05;
   x.clearRect(0, 0, W, H);
   x.globalCompositeOperation = "lighter";
   if (hasHold && f < 1) { x.globalAlpha = 1 - e; x.drawImage(hold, 0, 0); }
-  x.globalAlpha = hasHold ? e : Math.min(1, (now - fadeStart) / 1500);
+  x.globalAlpha = hasHold ? e : Math.min(1, since / 1500);
   x.filter = blurNow > .2 ? `blur(${(blurNow * dpr).toFixed(2)}px)` : "none";
   drawFit(x, c, previewTo);
   x.filter = "none"; x.globalAlpha = 1; x.globalCompositeOperation = "source-over";
@@ -271,7 +273,16 @@ function crossfadeTo(bmp) {
     hasHold = true;
     previewTo.close();
   }
+  const first = !previewTo;
   previewTo = bmp; fadeStart = performance.now(); fadeMs = stepMs();
+  if (first) {
+    // Start from an empty canvas at the right size, so nothing old or unscaled shows for a frame.
+    const dpr = devicePixelRatio || 1;
+    c.hidden = false;
+    const r = c.getBoundingClientRect();
+    c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
+    lastPaint = 0;
+  }
   c.hidden = false;
   if (!fadeRaf) fadeRaf = requestAnimationFrame(paintPreview);
 }
@@ -279,6 +290,7 @@ function clearPreview() {
   cancelAnimationFrame(fadeRaf); fadeRaf = 0;
   if (previewTo) previewTo.close();
   previewTo = null; hasHold = false; blurNow = blurTarget = 12;
+  const pc = $("preview"); pc.getContext("2d").clearRect(0, 0, pc.width, pc.height);
   $("preview").hidden = true;
   Scrawl.stop();
   document.body.classList.remove("fog");
