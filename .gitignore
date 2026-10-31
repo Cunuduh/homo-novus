@@ -1,0 +1,13 @@
+.mflux-venv/
+__pycache__/
+*.pyc
+output/
+logs/
+benchmark/mflux/
+benchmark/looks/
+benchmark/backup_before_strength/
+benchmark/disabled-int8-Fast/
+benchmark/*.log
+benchmark/results.jsonl
+web/.palette-original/
+.DS_Store

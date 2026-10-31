@@ -1,0 +1,131 @@
+{
+ "1": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "face_lincoln.jpg"
+  }
+ },
+ "2": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "arms_houdini.jpg"
+  }
+ },
+ "3": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "torso_roosevelt.jpg"
+  }
+ },
+ "4": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "legs_keaton.jpg"
+  }
+ },
+ "10": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "fibo2_edit_turbo_int8_convrot.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "11": {
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen3vl_4b_int8_convrot.safetensors",
+   "type": "fibo2",
+   "device": "default"
+  }
+ },
+ "12": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "flux2-vae.safetensors"
+  }
+ },
+ "13": {
+  "class_type": "TextEncodeFibo2",
+  "inputs": {
+   "clip": [
+    "11",
+    0
+   ],
+   "vae": [
+    "12",
+    0
+   ],
+   "prompt": "Create one new full-body photograph of a single Frankenstein-style man assembled from parts of four different people, shown from head to feet. Use only the face and head from <image_1>: the face is exactly the face from <image_1>, with its hair and beard. Use only both arms from <image_2>: the arms from shoulder to fingertips, exactly as in <image_2>, without chains or cuffs. Use only the torso from <image_3>: the chest and waist with the clothing on them, exactly as in <image_3>. Use only the legs from <image_4>: the legs with the clothing and footwear on them, exactly as in <image_4>. Join the parts with thick dark hand-sewn black surgical thread: a ring of stitches around the neck, a ring around each shoulder, and a ring around the waist. Skin tone and texture change abruptly at each seam, so the four donors stay visibly different. The seams are clean and healed with slight redness. The figure has exactly one head, two arms and two legs. Setting, pose and mood: Hunched over a cluttered wooden desk in a candlelit study at night, one hand gripping a quill, glaring at the camera with menace. Sharp realistic photograph, no text.",
+   "negative_prompt": "",
+   "width": 832,
+   "height": 1248,
+   "batch_size": 1,
+   "images.image_1": [
+    "1",
+    0
+   ],
+   "images.image_2": [
+    "2",
+    0
+   ],
+   "images.image_3": [
+    "3",
+    0
+   ],
+   "images.image_4": [
+    "4",
+    0
+   ]
+  }
+ },
+ "14": {
+  "class_type": "KSampler",
+  "inputs": {
+   "model": [
+    "10",
+    0
+   ],
+   "positive": [
+    "13",
+    0
+   ],
+   "negative": [
+    "13",
+    1
+   ],
+   "latent_image": [
+    "13",
+    2
+   ],
+   "seed": 42,
+   "steps": 4,
+   "cfg": 1.0,
+   "sampler_name": "euler",
+   "scheduler": "simple",
+   "denoise": 1.0
+  }
+ },
+ "15": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "vae": [
+    "12",
+    0
+   ],
+   "samples": [
+    "14",
+    0
+   ]
+  }
+ },
+ "16": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "images": [
+    "15",
+    0
+   ],
+   "filename_prefix": "fibo/edit_turbo"
+  }
+ }
+}

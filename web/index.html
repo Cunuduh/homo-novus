@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Homo Novus</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="brush" x="-8%" y="-40%" width="116%" height="180%"><feTurbulence type="fractalNoise" baseFrequency=".012 .19" numOctaves="4" seed="4"/><feDisplacementMap in="SourceGraphic" scale="46"/></filter>
+  <!-- Grades the creature to the page: dark mauve shadows up to pale lilac highlights, keeping some original colour. -->
+  <filter id="grade" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feColorMatrix in="SourceGraphic" values=".3 .59 .11 0 0  .3 .59 .11 0 0  .3 .59 .11 0 0  0 0 0 1 0" result="lum"/>
+    <feComponentTransfer in="lum" result="tone">
+      <feFuncR type="table" tableValues=".13 .30 .62 .90 .97"/>
+      <feFuncG type="table" tableValues=".09 .20 .46 .77 .93"/>
+      <feFuncB type="table" tableValues=".17 .33 .60 .84 .93"/>
+    </feComponentTransfer>
+    <feComposite in="tone" in2="SourceGraphic" operator="arithmetic" k1="0" k2=".78" k3=".22" k4="0"/>
+  </filter>
+  <filter id="worn" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <!-- Edges: fine noise breaks up the vector outline. -->
+    <feTurbulence type="fractalNoise" baseFrequency=".16" numOctaves="4" seed="3" result="fine"/>
+    <feDisplacementMap in="SourceGraphic" in2="fine" scale="2.5" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+    <!-- Wear: large patches decide where small chips are allowed to appear. -->
+    <feTurbulence type="fractalNoise" baseFrequency=".0065 .012" numOctaves="3" seed="21" result="patch"/>
+    <feTurbulence type="fractalNoise" baseFrequency=".06 .09" numOctaves="4" seed="5" result="chips"/>
+    <feComposite in="chips" in2="patch" operator="arithmetic" k1="0" k2="1" k3="-1" k4=".5" result="mix"/>
+    <feColorMatrix in="mix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 -18 13.9" result="keep"/>
+    <!-- Dust: isolated specks across the whole word. -->
+    <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="8"/>
+    <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 -16 13.2" result="dust"/>
+    <!-- Density: uneven ink coverage instead of one flat tint. -->
+    <feTurbulence type="fractalNoise" baseFrequency=".011 .03" numOctaves="4" seed="33"/>
+    <feColorMatrix values="0 0 0 .7 .55  0 0 0 .7 .55  0 0 0 .7 .55  0 0 0 0 1" result="density"/>
+    <feBlend in="rough" in2="density" mode="multiply" result="inked"/>
+    <feComposite in="inked" in2="rough" operator="in" result="inked2"/>
+    <feComposite in="inked2" in2="keep" operator="in" result="worn1"/>
+    <feComposite in="worn1" in2="dust" operator="in"/>
+  </filter>
+</svg>
+<div class="grain" aria-hidden="true"></div>
+
+<main class="app">
+  <div class="side" id="side">
+  <h1 class="title" id="title" aria-label="Homo Novus"><span>Homo</span><span>Novus</span></h1>
+  <p class="caption" id="caption">Create a New Man</p>
+  <form class="controls" id="ledger">
+    <ol id="rows"></ol>
+    <button type="button" class="link" id="sample">Autofill images</button>
+    <button type="submit" class="primary" id="go" disabled><span>Generate</span></button>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+    <div class="vigil" id="vigil" hidden>
+      <p class="stage"><span id="stage"></span><b id="count"></b></p>
+      <div class="meter" aria-hidden="true"><i id="thread"></i></div>
+      <p class="clock"><span><span id="clock">00:00</span> elapsed · <span id="eta"></span></span> <button type="button" class="link" id="abort">Cancel</button></p>
+    </div>
+    <div class="details" id="result" hidden>
+      <p class="meta"><span id="seedline"></span> <a class="link" id="keep" download>Download</a> <button type="button" class="link" id="look">Show cut-out</button> <button type="button" class="link" id="again">Change parts</button></p>
+    </div>
+  </form>
+  </div>
+
+  <div class="stagewrap">
+    <div class="drawing" id="drawing">
+      <svg id="overlay" viewBox="40 100 720 720" role="group" aria-label="Body parts on the Vitruvian Man"></svg>
+      <div class="circle" id="circle" aria-label="Output">
+        <canvas id="reveal" hidden></canvas>
+        <canvas id="preview" role="img" aria-label="Live preview of the image being generated" hidden></canvas>
+        <canvas id="scrawl" aria-hidden="true" hidden></canvas>
+      </div>
+      <svg class="chalktop" viewBox="40 100 720 720" aria-hidden="true"><image href="assets/vitruvian_chalk.png" x="0" y="0" width="800" height="1087"/></svg>
+    </div>
+  </div>
+</main>
+<script src="sky.js"></script>
+<script src="scrawl.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
